@@ -9,9 +9,9 @@ import numpy as np
 import tqdm
 from PIL import Image
 
-from mcatools.region import Region, Chunk
 from mcatools.definitions import REGION_WIDTH_CHUNKS, REGION_TOTAL_CHUNKS
-from mcatools.biome import biome_id_to_rgb
+from mcatools.biome import colors_rgb
+from mcatools.region import Region, Chunk
 
 
 def save_biome_image_rgb(biome_data: np.ndarray, filename: str):
@@ -19,7 +19,11 @@ def save_biome_image_rgb(biome_data: np.ndarray, filename: str):
     for index, block in tqdm.tqdm(
         enumerate(biome_data.flatten()), desc="coloring biome", total=biome_data.size
     ):
-        color_data[index] = biome_id_to_rgb(block)
+        try:
+            color_data[index] = colors_rgb[block]
+        except KeyError:
+            logging.error(f"Unknown biome id {block}")
+            color_data[index] = colors_rgb[999]  # magic value for unknown biomes
     colors = color_data.reshape(biome_data.shape[0], biome_data.shape[1], 3)
 
     im = Image.fromarray(colors, "RGB")

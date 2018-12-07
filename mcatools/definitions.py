@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 CHUNK_WIDTH_BLOCKS = 16
 CHUNK_TOTAL_BLOCKS = 256  # 16 * 16
 REGION_WIDTH_CHUNKS = 32
