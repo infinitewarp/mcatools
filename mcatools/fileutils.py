@@ -16,13 +16,13 @@ from mcatools.region import Region, Chunk
 
 def save_biome_image_rgb(biome_data: np.ndarray, filename: str):
     color_data = np.zeros((biome_data.size, 3), dtype=np.uint8)
-    for index, block in tqdm.tqdm(
+    for index, biome_id in tqdm.tqdm(
         enumerate(biome_data.flatten()), desc="coloring biome", total=biome_data.size
     ):
         try:
-            color_data[index] = colors_rgb[block]
+            color_data[index] = colors_rgb[biome_id]
         except KeyError:
-            logging.error(f"Unknown biome id {block}")
+            logging.error(f"Unknown biome id {biome_id}")
             color_data[index] = colors_rgb[999]  # magic value for unknown biomes
     colors = color_data.reshape(biome_data.shape[0], biome_data.shape[1], 3)
 
