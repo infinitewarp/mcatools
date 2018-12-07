@@ -59,10 +59,9 @@ def extract_nbt_data(chunk_data: bytes) -> nbtlib.tag.Compound:
     data_end = data_start + length - 1
     compressed_data = chunk_data[data_start:data_end]
     raw_nbt_data = zlib.decompress(compressed_data)
-    bytes_io = io.BytesIO()
-    bytes_io.write(raw_nbt_data)
-    bytes_io.seek(0)
-    nbt_data = nbtlib.File.parse(bytes_io).root
+    bytes_io = io.BytesIO(raw_nbt_data)
+    bytes_io.name = None  # because nbtlib expects a name
+    nbt_data = nbtlib.File.from_buffer(bytes_io).root
     return nbt_data
 
 
