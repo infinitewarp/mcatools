@@ -11,6 +11,9 @@ flake8 = "*"
 [packages]
 nbtlib = "*"
 tqdm = "*"
+numpy = "*"
+pillow = "*"
+click = "*"
 
 [requires]
 python_version = "3.7"
