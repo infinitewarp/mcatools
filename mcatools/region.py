@@ -7,6 +7,7 @@ from mcatools.definitions import (
     CHUNK_WIDTH_BLOCKS,
     REGION_WIDTH_CHUNKS,
     REGION_TOTAL_CHUNKS,
+    REGION_WIDTH_BLOCKS_BITS,
 )
 
 
@@ -32,6 +33,21 @@ class Region(object):
                 f"Region needs { REGION_TOTAL_CHUNKS } chunks, not {len(chunks)}."
             )
         self.chunks = chunks
+
+    @staticmethod
+    def filename_for_block_coords(block_x, block_z):
+        """
+        Get the filename for the region containing the (x,z) coordinate block.
+
+        :param block_x: x coordinate of a block
+        :type block_x: int
+        :param block_z: z coordinate of a block
+        :type block_z: int
+        :return: string filename for the region
+        """
+        region_x = block_x >> REGION_WIDTH_BLOCKS_BITS
+        region_z = block_z >> REGION_WIDTH_BLOCKS_BITS
+        return f"r.{region_x}.{region_z}.mca"
 
 
 class Chunk(object):
