@@ -8,6 +8,7 @@ black = "*"
 ipython = "*"
 flake8 = "*"
 ipdb = "*"
+pytest = "*"
 
 [packages]
 nbtlib = "*"
