@@ -49,6 +49,23 @@ class Region(object):
         region_z = block_z >> REGION_WIDTH_BLOCKS_BITS
         return f"r.{region_x}.{region_z}.mca"
 
+    @staticmethod
+    def coordinate_bounds_for_region_coords(region_x, region_z):
+        """
+        Get the min and max block coordinate bounded by the given region coordinate.
+
+        :param region_x: x coordinate of a region ("x" part of the filename)
+        :type region_x: int
+        :param region_z: z coordinate of a region ("z" part of the filename)
+        :type region_x: int
+        :return: tuple (min_x, min_z, max_x, max_z) for the bounded blocks
+        """
+        min_block_x = region_x << REGION_WIDTH_BLOCKS_BITS
+        min_block_z = region_z << REGION_WIDTH_BLOCKS_BITS
+        max_block_x = ((region_x + 1) << REGION_WIDTH_BLOCKS_BITS) - 1
+        max_block_z = ((region_z + 1) << REGION_WIDTH_BLOCKS_BITS) - 1
+        return min_block_x, min_block_z, max_block_x, max_block_z
+
 
 class Chunk(object):
     """Everything you need to know about a 16x256x16 chunk."""
