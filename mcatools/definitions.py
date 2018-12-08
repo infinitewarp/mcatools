@@ -8,6 +8,8 @@ REGION_WIDTH_BLOCKS = 512  # 16 * 32
 REGION_WIDTH_BLOCKS_BITS = 9  # 2**9 == 515
 REGION_TOTAL_BLOCKS = 262_144  # 512 * 512
 
+MAX_BLOCK_ID = 4096  # for the Anvil file format
+
 
 class BiomeType(Enum):
     ocean = 0

@@ -4,6 +4,7 @@ from mcatools.definitions import (
     CHUNK_WIDTH_BLOCKS,
     REGION_WIDTH_BLOCKS,
     REGION_TOTAL_BLOCKS,
+    MAX_BLOCK_ID,
 )
 from mcatools.region import calculate_chunk_bounds, Region
 
@@ -107,11 +108,10 @@ colors_hex = {
     165: "ff6d3d",
     166: "d8bf8d",
     167: "f2b48d",
-    999: "ccffff",  # special to use for unknown biome IDs
 }
 
-colors_rgb = dict()
+
+colors_rgb = np.full((MAX_BLOCK_ID, 3), fill_value=255, dtype=np.uint8)
 for biome_id, hexstring in colors_hex.items():
     color_bytes = bytes.fromhex(hexstring)
-    rgb = [color_bytes[0], color_bytes[1], color_bytes[2]]
-    colors_rgb[biome_id] = np.array(rgb, dtype=np.uint8)
+    colors_rgb[biome_id] = color_bytes[0], color_bytes[1], color_bytes[2]

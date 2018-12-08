@@ -19,11 +19,7 @@ def save_biome_image_rgb(biome_data: np.ndarray, filename: str):
     for index, biome_id in tqdm.tqdm(
         enumerate(biome_data.flatten()), desc="coloring biome", total=biome_data.size
     ):
-        try:
-            color_data[index] = colors_rgb[biome_id]
-        except KeyError:
-            logging.error(f"Unknown biome id {biome_id}")
-            color_data[index] = colors_rgb[999]  # magic value for unknown biomes
+        color_data[index] = colors_rgb[biome_id]
     colors = color_data.reshape(biome_data.shape[0], biome_data.shape[1], 3)
 
     im = Image.fromarray(colors, "RGB")
