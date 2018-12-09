@@ -19,6 +19,8 @@ def save_biome_image_rgb(biome_data: np.ndarray, filename: str):
 
 def load_biome_image_rgb(filename: str):
     image = Image.open(filename)
+    if image.mode != "RGB":
+        image = image.convert("RGB")
     pixels = image.load()
     biome_data = np.zeros((image.width, image.height), dtype=np.uint8)
     for z in range(image.height):
