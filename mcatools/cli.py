@@ -1,6 +1,7 @@
 import click
 
-from mcatools.fileutils import save_biome_image_rgb, extract_region, readfile
+from mcatools.imageutils import save_biome_image_rgb
+from mcatools.region import Region
 
 
 @click.group()
@@ -13,8 +14,7 @@ def main():
 @click.argument("image_filename")
 def export_biome(region_filename, image_filename):
     click.echo(f"Loading region data from: {region_filename}")
-    filedata = readfile(region_filename)
-    region = extract_region(filedata)
+    region = Region.load(region_filename)
     biome_data = region.get_biomes()
     save_biome_image_rgb(biome_data, image_filename)
     click.echo(f"Biome data saved to: {image_filename}")
