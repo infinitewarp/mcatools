@@ -9,8 +9,8 @@ import numpy as np
 import tqdm
 from PIL import Image
 
+from mcatools.biome import colors_rgb, colors_hex_reverse
 from mcatools.definitions import REGION_WIDTH_CHUNKS, REGION_TOTAL_CHUNKS
-from mcatools.biome import colors_rgb
 from mcatools.region import Region, Chunk
 
 
@@ -24,6 +24,22 @@ def save_biome_image_rgb(biome_data: np.ndarray, filename: str):
 
     im = Image.fromarray(colors, "RGB")
     im.save(filename)
+
+
+def load_biome_image_rgb(filename: str):
+    image = Image.open(filename)
+    pixels = image.load()
+    biome_data = np.zeros((image.width, image.height), dtype=np.uint8)
+    for z in range(image.height):
+        for x in range(image.width):
+            hex_color = "%02x%02x%02x" % pixels[(x, z)]
+            try:
+                biome_id = colors_hex_reverse[hex_color]
+            except KeyError:
+                biome_id = 0
+            # Yes, "flipping" the x/z axes is correct here.
+            biome_data[z][x] = biome_id
+    return biome_data
 
 
 def save_biome_image_mono(biome_data: np.ndarray, filename: str):

@@ -2,12 +2,15 @@ import datetime
 import math
 
 import nbtlib
+import numpy as np
 
 from mcatools.definitions import (
     CHUNK_WIDTH_BLOCKS,
     REGION_WIDTH_CHUNKS,
     REGION_TOTAL_CHUNKS,
     REGION_WIDTH_BLOCKS_BITS,
+    REGION_TOTAL_BLOCKS,
+    REGION_WIDTH_BLOCKS,
 )
 
 
@@ -17,6 +20,7 @@ def calculate_chunk_bounds(index):
     :param index:
     :return:
     """
+    # Remember: z increments and wraps around before x increments!
     z_start = (index % REGION_WIDTH_CHUNKS) * CHUNK_WIDTH_BLOCKS
     z_end = z_start + CHUNK_WIDTH_BLOCKS
     x_start = math.floor(index / REGION_WIDTH_CHUNKS) * CHUNK_WIDTH_BLOCKS
@@ -33,6 +37,51 @@ class Region(object):
                 f"Region needs { REGION_TOTAL_CHUNKS } chunks, not {len(chunks)}."
             )
         self.chunks = chunks
+        self._biomes = None
+
+    def get_biomes(self, force_reread: bool = False) -> np.ndarray:
+        """
+        Extract the full region's biome ids into a region-shaped numpy array.
+
+        :return: np.ndarray: region-shaped numpy array of biome ids
+        """
+        if self._biomes and not force_reread:
+            return self._biomes
+
+        region_biomes = np.zeros(REGION_TOTAL_BLOCKS, dtype=np.uint8).reshape(
+            REGION_WIDTH_BLOCKS, REGION_WIDTH_BLOCKS
+        )
+
+        for index, chunk in enumerate(self.chunks):
+            z_start, z_end, x_start, x_end = calculate_chunk_bounds(index)
+
+            if chunk.empty:
+                continue
+
+            chunk_biome = chunk.nbt_data["Level"]["Biomes"].reshape(
+                CHUNK_WIDTH_BLOCKS, CHUNK_WIDTH_BLOCKS
+            )
+            region_biomes[z_start:z_end, x_start:x_end] = chunk_biome
+
+        self._biomes = region_biomes
+        return self._biomes
+
+    def set_biomes(self, new_biomes):
+        """
+        Overwrite the region's chunk's current data with the given biomes.
+
+        :param new_biomes: region-shaped numpy array of biome ids
+        :type new_biomes: np.ndarray
+        """
+        self._biomes = new_biomes
+
+        for index, chunk in enumerate(self.chunks):
+            z_start, z_end, x_start, x_end = calculate_chunk_bounds(index)
+
+            if chunk.empty:
+                continue
+
+            chunk.nbt_data["Level"]["Biomes"] = new_biomes[z_start:z_end, x_start:x_end]
 
     @staticmethod
     def filename_for_block_coords(block_x, block_z):

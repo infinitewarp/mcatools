@@ -1,38 +1,6 @@
 import numpy as np
 
-from mcatools.definitions import (
-    CHUNK_WIDTH_BLOCKS,
-    REGION_WIDTH_BLOCKS,
-    REGION_TOTAL_BLOCKS,
-    MAX_BLOCK_ID,
-)
-from mcatools.region import calculate_chunk_bounds, Region
-
-
-def extract_region_biomes(region: Region) -> np.ndarray:
-    """
-    Extract the full region's biome definition into a region-shaped array.
-
-    :return: np.ndarray: the biome ids
-    """
-    region_biomes = np.zeros(REGION_TOTAL_BLOCKS, dtype=np.uint8).reshape(
-        REGION_WIDTH_BLOCKS, REGION_WIDTH_BLOCKS
-    )
-
-    for index, chunk in enumerate(region.chunks):
-        # Remember: z increments and wraps around before x increments!
-        z_start, z_end, x_start, x_end = calculate_chunk_bounds(index)
-
-        if chunk.empty:
-            continue
-
-        chunk_biome = chunk.nbt_data["Level"]["Biomes"].reshape(
-            CHUNK_WIDTH_BLOCKS, CHUNK_WIDTH_BLOCKS
-        )
-        region_biomes[z_start:z_end, x_start:x_end] = chunk_biome
-
-    return region_biomes
-
+from mcatools.definitions import MAX_BLOCK_ID
 
 colors_hex = {
     0: "000070",
@@ -109,6 +77,8 @@ colors_hex = {
     166: "d8bf8d",
     167: "f2b48d",
 }
+
+colors_hex_reverse = {value: key for key, value in colors_hex.items()}
 
 
 colors_rgb = np.full((MAX_BLOCK_ID, 3), fill_value=255, dtype=np.uint8)
