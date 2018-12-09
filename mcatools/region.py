@@ -17,6 +17,7 @@ from mcatools.definitions import (
     REGION_WIDTH_BLOCKS_BITS,
     REGION_TOTAL_BLOCKS,
     REGION_WIDTH_BLOCKS,
+    CHUNK_TOTAL_BLOCKS,
 )
 
 
@@ -209,12 +210,18 @@ class Region(object):
         for index, chunk in enumerate(self.chunks):
             z_start, z_end, x_start, x_end = calculate_chunk_bounds(index)
 
-            if chunk.empty:
+            if chunk.empty or chunk.nbt_data is None:
+                continue
+            biomes = chunk.nbt_data.root.get("Level", {}).get("Biomes", None)
+            if biomes is None:
+                continue
+            if biomes.size == 0:
+                continue
+            if biomes.size != CHUNK_TOTAL_BLOCKS:
+                logging.error(f"unexpected biomes.size {biomes.size} in chunk {chunk}")
                 continue
 
-            chunk_biome = chunk.nbt_data.root["Level"]["Biomes"].reshape(
-                CHUNK_WIDTH_BLOCKS, CHUNK_WIDTH_BLOCKS
-            )
+            chunk_biome = biomes.reshape(CHUNK_WIDTH_BLOCKS, CHUNK_WIDTH_BLOCKS)
             region_biomes[z_start:z_end, x_start:x_end] = chunk_biome
 
         self._biomes = region_biomes
@@ -227,12 +234,20 @@ class Region(object):
         :param new_biomes: region-shaped numpy array of biome ids
         :type new_biomes: np.ndarray
         """
-        self._biomes = new_biomes
+        self._biomes = None
 
         for index, chunk in enumerate(self.chunks):
             z_start, z_end, x_start, x_end = calculate_chunk_bounds(index)
 
-            if chunk.empty:
+            if chunk.empty or chunk.nbt_data is None:
+                continue
+            biomes = chunk.nbt_data.root.get("Level", {}).get("Biomes", None)
+            if biomes is None:
+                continue
+            if biomes.size == 0:
+                continue
+            if biomes.size != CHUNK_TOTAL_BLOCKS:
+                logging.error(f"unexpected biomes.size {biomes.size} in chunk {chunk}")
                 continue
 
             chunk.nbt_data.root["Level"]["Biomes"] = nbtlib.IntArray(
