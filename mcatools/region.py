@@ -210,19 +210,13 @@ class Region(object):
         for index, chunk in enumerate(self.chunks):
             z_start, z_end, x_start, x_end = calculate_chunk_bounds(index)
 
-            if chunk.empty or chunk.nbt_data is None:
-                continue
-            biomes = chunk.nbt_data.root.get("Level", {}).get("Biomes", None)
-            if biomes is None:
-                continue
-            if biomes.size == 0:
-                continue
-            if biomes.size != CHUNK_TOTAL_BLOCKS:
-                logging.error(f"unexpected biomes.size {biomes.size} in chunk {chunk}")
+            chunk_biomes = chunk.get_biomes()
+            if chunk_biomes is None:
                 continue
 
-            chunk_biome = biomes.reshape(CHUNK_WIDTH_BLOCKS, CHUNK_WIDTH_BLOCKS)
-            region_biomes[z_start:z_end, x_start:x_end] = chunk_biome
+            region_biomes[z_start:z_end, x_start:x_end] = chunk_biomes.reshape(
+                CHUNK_WIDTH_BLOCKS, CHUNK_WIDTH_BLOCKS
+            )
 
         self._biomes = region_biomes
         return self._biomes
@@ -239,15 +233,8 @@ class Region(object):
         for index, chunk in enumerate(self.chunks):
             z_start, z_end, x_start, x_end = calculate_chunk_bounds(index)
 
-            if chunk.empty or chunk.nbt_data is None:
-                continue
-            biomes = chunk.nbt_data.root.get("Level", {}).get("Biomes", None)
-            if biomes is None:
-                continue
-            if biomes.size == 0:
-                continue
-            if biomes.size != CHUNK_TOTAL_BLOCKS:
-                logging.error(f"unexpected biomes.size {biomes.size} in chunk {chunk}")
+            chunk_biomes = chunk.get_biomes()
+            if chunk_biomes is None:
                 continue
 
             chunk.nbt_data.root["Level"]["Biomes"] = nbtlib.IntArray(
@@ -322,3 +309,22 @@ class Chunk(object):
             "datetime": str(self.datetime),
         }
         return f"<{self.__class__.__name__} {repr_data}>"
+
+    def get_biomes(self):
+        if self.empty:
+            logging.error(f"empty chunk {self}")
+            return None
+        if self.nbt_data is None:
+            logging.error(f"no NBT data in chunk {self}")
+            return None
+        biomes = self.nbt_data.root.get("Level", {}).get("Biomes", None)
+        if biomes is None:
+            logging.error(f"biomes NBT node not present in chunk {self}")
+            return None
+        if biomes.size == 0:
+            logging.error(f"biomes present, but size 0 in chunk {self}")
+            return None
+        if biomes.size != CHUNK_TOTAL_BLOCKS:
+            logging.error(f"unexpected biomes.size {biomes.size} in chunk {self}")
+            return None
+        return biomes
