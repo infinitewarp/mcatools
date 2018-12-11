@@ -81,6 +81,27 @@ colors_hex = {
 colors_hex_reverse = {value: key for key, value in colors_hex.items()}
 
 
+def match_color(input):
+    """
+    Get the closest known matching hex color.
+
+    :param input: hex color string
+    :return: tuple(hex color string, bool True if exact match)
+    """
+    if input in colors_hex.values():
+        return input, True
+    input_rgb = bytes.fromhex(input)
+    known_rbgs = [bytes.fromhex(hexstring) for hexstring in colors_hex.values()]
+    sorted_rgbs = sorted(
+        known_rbgs,
+        key=lambda x: (x[0] - input_rgb[0]) ** 2
+        + (x[1] - input_rgb[1]) ** 2
+        + (x[2] - input_rgb[2]) ** 2,
+    )
+    closest = sorted_rgbs[0]
+    return "%02x%02x%02x" % (closest[0], closest[1], closest[2]), False
+
+
 colors_rgb = np.full((MAX_BLOCK_ID, 3), fill_value=255, dtype=np.uint8)
 for biome_id, hexstring in colors_hex.items():
     color_bytes = bytes.fromhex(hexstring)

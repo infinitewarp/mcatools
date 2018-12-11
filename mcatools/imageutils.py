@@ -1,8 +1,10 @@
+import logging
+
 import numpy as np
 import tqdm
 from PIL import Image
 
-from mcatools.biome import colors_rgb, colors_hex_reverse
+from mcatools.biome import colors_rgb, colors_hex_reverse, match_color
 
 
 def save_biome_image_rgb(biome_data: np.ndarray, filename: str):
@@ -26,10 +28,13 @@ def load_biome_image_rgb(filename: str):
     for z in range(image.height):
         for x in range(image.width):
             hex_color = "%02x%02x%02x" % pixels[(x, z)]
-            try:
-                biome_id = colors_hex_reverse[hex_color]
-            except KeyError:
-                biome_id = 0
+            matched_hex_color, exact = match_color(hex_color)
+            if not exact:
+                logging.warning(
+                    f"no biome found for exact color {hex_color} at pixel "
+                    f"(x={x}, z={z}); using closest match {matched_hex_color}"
+                )
+            biome_id = colors_hex_reverse[matched_hex_color]
             # Yes, "flipping" the x/z axes is correct here.
             biome_data[z][x] = biome_id
     return biome_data
