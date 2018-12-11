@@ -237,7 +237,13 @@ class Region(object):
             if chunk_biomes is None:
                 continue
 
-            chunk.nbt_data.root["Level"]["Biomes"] = nbtlib.IntArray(
+            nbt_type = type(chunk.nbt_data.root["Level"]["Biomes"])
+            # Getting the type here is necessary because some older chunks
+            # use ByteArray for the biomes, but newer chunks use IntArray.
+            # Unfortunately, even "converted" worlds still sometimes have
+            # chunks with old-style data structures in them.
+
+            chunk.nbt_data.root["Level"]["Biomes"] = nbt_type(
                 new_biomes[z_start:z_end, x_start:x_end].flatten()
             )
 
